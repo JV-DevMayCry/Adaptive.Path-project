@@ -43,7 +43,8 @@ public class PlayerController : MonoBehaviour
 
     private void move()
     {
-        animator.SetFloat("Speed", moveInput.magnitude);
+
+        animator.SetFloat("Speed", moveInput.magnitude, 0.1f, Time.deltaTime);
 
         float cameraY = cameraTransform.eulerAngles.y;
         Quaternion cameraRotation = Quaternion.Euler(0f, cameraY, 0f);
