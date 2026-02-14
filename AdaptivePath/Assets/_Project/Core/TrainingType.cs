@@ -1,6 +1,10 @@
 using UnityEngine;
 
-public class TrainingType
+public enum TrainingType
 {
     
+    Solo,
+    Combat,
+    Instructor
+
 }

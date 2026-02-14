@@ -29,13 +29,13 @@ public class Skills
     {
          switch(type)
         {
-            case TrainingType.Solo
+            case TrainingType.Solo:
                 return 1f;
 
-            case TrainingType.Combat
+            case TrainingType.Combat:
                 return 1.5f;
 
-            case TrainingType.Instructor
+            case TrainingType.Instructor:
                 return 2f;
 
             default:
