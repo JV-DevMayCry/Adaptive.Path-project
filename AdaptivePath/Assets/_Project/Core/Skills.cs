@@ -5,6 +5,7 @@ public class Skills
 {
 
     public string Swordsmanship;
+    public SkillGroup Weapons;
     public int level = 0;
     public int currentXP = 0;
     public int xpToNextLevel = 250;
