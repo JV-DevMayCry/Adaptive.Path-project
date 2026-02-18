@@ -760,6 +760,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1782702501690864755, guid: 60770bdb4dc667c45bea53db0339dc05, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1418980259}
+    - targetCorrespondingSourceObject: {fileID: 1782702501690864755, guid: 60770bdb4dc667c45bea53db0339dc05, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1418980261}
   m_SourcePrefab: {fileID: 100100000, guid: 60770bdb4dc667c45bea53db0339dc05, type: 3}
 --- !u!1 &1418980254 stripped
 GameObject:
@@ -835,6 +838,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 5
   cameraTransform: {fileID: 143599117}
+--- !u!114 &1418980261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1418980254}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5a749479eafb414fa933aa7dbc8be5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSkillSystem
+  allSkills:
+  - {fileID: 11400000, guid: 8909ecdbd1423db4eb70f44c9b45a830, type: 2}
+  - {fileID: 11400000, guid: d84f3a6a9fb2a5d4093555238e1c9b8e, type: 2}
+  playerSkills:
+  - data: {fileID: 11400000, guid: 8909ecdbd1423db4eb70f44c9b45a830, type: 2}
+    level: 0
+    currentXP: 0
+    XPToNextLevel: 0
+    state: 0
+    penaltyStacks: 0
+    specializationTier: 0
+    lastMilestoneReached: 0
+  - data: {fileID: 11400000, guid: d84f3a6a9fb2a5d4093555238e1c9b8e, type: 2}
+    level: 1
+    currentXP: 1500
+    XPToNextLevel: 0
+    state: 0
+    penaltyStacks: 0
+    specializationTier: 0
+    lastMilestoneReached: 0
 --- !u!1 &1482875350
 GameObject:
   m_ObjectHideFlags: 0

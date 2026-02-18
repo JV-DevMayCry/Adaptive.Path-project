@@ -127,6 +127,9 @@ public class PlayerSkillSystem : MonoBehaviour
     }
     public void NotifyMilestone(PlayerSkill skill)
     {
+
+        Debug.Log("Milestone atingido por:" + skill.data.skillName + "nivel" + skill.level);
+
         currentMilestone = skill.level;
 
         StartMilestoneWindow(skill);
@@ -136,29 +139,29 @@ public class PlayerSkillSystem : MonoBehaviour
 
     void Update()
     {
-        if (milestoneWindowActive)
-        {
-            milestoneTimer -= Time.deltaTime;
+         {
+             milestoneTimer -= Time.deltaTime;
 
-            if (milestoneTimer <= 0f)
-            {
-                EndMilestoneWindow();
-            }
-        }
-        if (dailyWindowActive)
-        {
-            dailyTimer -= Time.deltaTime;
-            if (dailyTimer <= 0f)
-            {
-                EndDailyWindow();
-            }
-        }
+             if (milestoneTimer <= 0f)
+             {
+                 EndMilestoneWindow();
+             }
+         }
+         if (dailyWindowActive)
+         {
+             dailyTimer -= Time.deltaTime;
+             if (dailyTimer <= 0f)
+             {
+                 EndDailyWindow();
+             }
+         }
     }
 
     void StartMilestoneWindow(PlayerSkill skill)
     {
         if (!milestoneWindowActive)
         {
+            Debug.Log("Janela de especialização iniciada!");
             milestoneWindowActive = true;
             milestoneTimer = 60f;
             milestoneCandidates.Clear();
@@ -167,6 +170,7 @@ public class PlayerSkillSystem : MonoBehaviour
 
         if (skill.level == currentMilestone)
         {
+            Debug.Log(skill.data.skillName + "entrou como candidata.");
             milestoneCandidates.Add(skill);
         }
     }
@@ -175,6 +179,8 @@ public class PlayerSkillSystem : MonoBehaviour
     {
         milestoneWindowActive = false;
 
+        Debug.Log("Janela encerrada. Total candidatos" + milestoneCandidates.Count);
+
         if (milestoneCandidates.Count > 1)
         {
             foreach (var skill in milestoneCandidates)
@@ -182,6 +188,8 @@ public class PlayerSkillSystem : MonoBehaviour
 
                 skill.state = SkillState.Specialized;
                 skill.specializationTier++;
+
+                Debug.Log(skill.data.skillName + "Virou Specialized!");
             }
         }
     }
@@ -189,6 +197,22 @@ public class PlayerSkillSystem : MonoBehaviour
     public void CancelMilestoneWindow()
     {
         milestoneWindowActive = false;
+
+    }
+
+    [ContextMenu("Test Sword XP")]
+    void TestSwordXP()
+    {
+    
+        GainSkillXP("Swordsmanship", 1000, TrainingType.Combat);
+
+    }
+
+    [ContextMenu("Test Fire XP")]
+    void TestFireXP()
+    {
+
+        GainSkillXP("Fire Magic", 1000, TrainingType.Combat);
 
     }
 
