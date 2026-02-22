@@ -29,6 +29,7 @@ public class PlayerSkill
 
         data = skillsData;
         XPToNextLevel = data.baseXPToNextLevel;
+        skillSystem = system;
 
     }
 
@@ -47,8 +48,29 @@ public class PlayerSkill
         
     }
 
+    bool IsMilestoneLevel()
+    {
+
+        if (level % 25 == 0 && level != lastMilestoneReached)
+        {
+            lastMilestoneReached = level;
+            return true;
+        }
+
+        return false;
+    }
+
     void LevelUp()
     {
+
+        if (level >= 25 && state != SkillState.Specialized)
+        {
+
+            currentXP = XPToNextLevel;
+            Debug.Log(data.skillName + "está travada no nivel 25");
+
+        }
+
 
         level++;
         currentXP -= XPToNextLevel;
@@ -56,7 +78,13 @@ public class PlayerSkill
 
         Debug.Log(data.skillName + "subiu para nìvel" + level);
 
-        skillSystem.NotifyMilestone(this);
+        if (level == 25 && skillSystem != null)
+        {
+
+            skillSystem.NotifyReathed25(this);
+
+        }
+        
 
     }
 }

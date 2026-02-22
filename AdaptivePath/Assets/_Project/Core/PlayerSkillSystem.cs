@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 public class PlayerSkillSystem : MonoBehaviour
 {
 
-    public List<SkillsData> allSkills;
+    
     public List<PlayerSkill> playerSkills = new List<PlayerSkill>();
     private List<PlayerSkill> milestoneCandidates = new List<PlayerSkill>();
 
@@ -15,24 +15,40 @@ public class PlayerSkillSystem : MonoBehaviour
     private bool dailyWindowActive = false;
     private float dailyTimer = 0f;
 
+    int penaltyTier = 0;
+
     private int currentMilestone = 0;
+
+    [SerializeField] private SkillsData swordSkill;
+    [SerializeField] private SkillsData fireSkill;
 
     void Start()
     {
+        SkillsManager manager = FindFirstObjectByType<SkillsManager>();
 
-        foreach (SkillsData skill in allSkills)
+        if (manager == null)
+        {
+
+            Debug.LogError("SkillsMnager não encontrado na cena!");
+            return;
+        
+        }
+
+        foreach (SkillsData skill in manager.allSkills)
         {
 
             playerSkills.Add(new PlayerSkill(skill, this));
 
         }
 
+        Debug.Log("PlayerSkillSystem inicializado com " + playerSkills.Count + "skills");
+        
     }
 
-    public void GainSkillXP(string skillName, int baseXP, TrainingType type)
+    public void GainSkillXP(SkillsData skillName, int baseXP, TrainingType type)
     {
 
-        PlayerSkill skill = playerSkills.Find(s => s.data.skillName == skillName);
+        PlayerSkill skill = playerSkills.Find(s => s.data == skillName);
 
         if (skill == null) return;
         {
@@ -44,107 +60,131 @@ public class PlayerSkillSystem : MonoBehaviour
 
             skill.AddXP(finalXP);
 
+            Debug.Log("Tentando gahar XP em " + skillName);
+
+            if (skill == null)
+            {
+
+                Debug.Log("Skill não encontrada: " + skillName);
+            }
+
+
+            float GetSpecializationPenalty(SkillGroup targetGroup)
+            {
+                if (targetGroup == SkillGroup.Crafting)
+                    return 1f;
+
+                SkillGroup oppositeGroup = targetGroup == SkillGroup.Weapons ? SkillGroup.Magic : SkillGroup.Weapons;
+
+                int highestOppositeLevel = 0;
+
+                foreach (PlayerSkill skill in playerSkills)
+                {
+                    if (skill.data.group == oppositeGroup)
+                    {
+
+                        if (skill.level > highestOppositeLevel)
+                            highestOppositeLevel = skill.level;
+
+                    }
+                }
+
+                float penalty = 1f / (1f + highestOppositeLevel * 0.01f);
+
+
+                return Mathf.Clamp(penalty, 0.2f, 1f);
+            }
+
+            float GetTrainingMultiplier(TrainingType type)
+            {
+
+                switch (type)
+                {
+                    case TrainingType.Solo:
+                        return 1f;
+
+                    case TrainingType.Combat:
+                        return 1.5f;
+
+                    case TrainingType.Instructor:
+                        return 2f;
+
+                    default:
+                        return 0f;
+                }
+                ;
+
+
+            }
+
+
+
+        }
+    }
+
+        void StartDailyWindow()
+        {
+
+            dailyWindowActive = true;
+
+            dailyTimer = 600f;
 
         }
 
-        float GetSpecializationPenalty(SkillGroup targetGroup)
+        void EndDailyWindow()
         {
-            if (targetGroup == SkillGroup.Crafting)
-                return 1f;
 
-            SkillGroup oppositeGroup = targetGroup == SkillGroup.Weapons ? SkillGroup.Magic : SkillGroup.Weapons;
-
-            int highestOppositeLevel = 0;
+            dailyWindowActive = false;
 
             foreach (PlayerSkill skill in playerSkills)
             {
-                if (skill.data.group == oppositeGroup)
+                if (skill.state == SkillState.Neutral && skill.level >= currentMilestone)
                 {
 
-                    if (skill.level > highestOppositeLevel)
-                        highestOppositeLevel = skill.level;
+                    skill.state = SkillState.Penalized;
+                    skill.penaltyStacks = penaltyTier;
 
-                }
+                    Debug.Log(skill.data.skillName + "foi penalizada no fim do dia");
+
+            }
             }
 
-            float penalty = 1f / (1f + highestOppositeLevel * 0.01f);
-
-
-            return Mathf.Clamp(penalty, 0.2f, 1f);
         }
-
-        float GetTrainingMultiplier(TrainingType type)
-        {
-
-            switch (type)
-            {
-                case TrainingType.Solo:
-                    return 1f;
-
-                case TrainingType.Combat:
-                    return 1.5f;
-
-                case TrainingType.Instructor:
-                    return 2f;
-
-                default:
-                    return 0f;
-            }
-            ;
-
-
-        }
-
-
-
-    }
-
-    void StartDailyWindow()
-    {
-
-        dailyWindowActive = true;
-
-        dailyTimer = 600f;
     
-    }
 
-    void EndDailyWindow()
+    public void NotifyReached25(PlayerSkill skill)
     {
 
-        dailyWindowActive = false;
-
-        foreach(PlayerSkill skill in playerSkills)
+        if (!milestoneWindowActive)
         {
-            if(skill.state == SkillState.Neutral)
-            {
 
-                skill.state = SkillState.Penalized;
-                skill.penaltyStacks++;
+            Debug.Log("Janela de especialização iniciada");
+            milestoneWindowActive = true;
+            milestoneTimer = 60f;
+            milestoneCandidates.Clear();
 
-            }
         }
 
-    }
-    public void NotifyMilestone(PlayerSkill skill)
-    {
+        if (!milestoneCandidates.Contains(skill))
+        { 
+            
+            milestoneCandidates.Add(skill);
+            Debug.Log(skill.data.skillName + "entrou como candidata.");
 
-        Debug.Log("Milestone atingido por:" + skill.data.skillName + "nivel" + skill.level);
-
-        currentMilestone = skill.level;
-
-        StartMilestoneWindow(skill);
-        StartDailyWindow();
+        }
 
     }
 
     void Update()
     {
+        if (milestoneWindowActive)
          {
              milestoneTimer -= Time.deltaTime;
 
              if (milestoneTimer <= 0f)
              {
-                 EndMilestoneWindow();
+                milestoneTimer = 0f;
+                EndMilestoneWindow();
              }
          }
          if (dailyWindowActive)
@@ -155,6 +195,8 @@ public class PlayerSkillSystem : MonoBehaviour
                  EndDailyWindow();
              }
          }
+
+        Debug.Log("Timer milestone" + Mathf.Ceil(milestoneTimer));
     }
 
     void StartMilestoneWindow(PlayerSkill skill)
@@ -168,7 +210,7 @@ public class PlayerSkillSystem : MonoBehaviour
             currentMilestone = skill.level;
         }
 
-        if (skill.level == currentMilestone)
+        if (!milestoneCandidates.Contains(skill))
         {
             Debug.Log(skill.data.skillName + "entrou como candidata.");
             milestoneCandidates.Add(skill);
@@ -178,20 +220,35 @@ public class PlayerSkillSystem : MonoBehaviour
     void EndMilestoneWindow()
     {
         milestoneWindowActive = false;
+        milestoneTimer = 0f;
 
         Debug.Log("Janela encerrada. Total candidatos" + milestoneCandidates.Count);
 
-        if (milestoneCandidates.Count > 1)
+        
+        foreach (var skill in milestoneCandidates)
         {
-            foreach (var skill in milestoneCandidates)
+
+          skill.state = SkillState.Specialized;
+          skill.specializationTier = 1;
+
+          Debug.Log(skill.data.skillName + "Virou Specialized!");
+        }
+
+        foreach(var skill in playerSkills)
+        {
+
+            if (skill.level >= 25 && skill.state != SkillState.Specialized)
             {
 
-                skill.state = SkillState.Specialized;
-                skill.specializationTier++;
+              skill.state = SkillState.Penalized;
+              Debug.Log(skill.data.skillName + "travada em 25");
 
-                Debug.Log(skill.data.skillName + "Virou Specialized!");
             }
+
         }
+
+
+        
     }
 
     public void CancelMilestoneWindow()
@@ -204,7 +261,7 @@ public class PlayerSkillSystem : MonoBehaviour
     void TestSwordXP()
     {
     
-        GainSkillXP("Swordsmanship", 1000, TrainingType.Combat);
+        GainSkillXP(swordSkill, 999999, TrainingType.Combat);
 
     }
 
@@ -212,7 +269,7 @@ public class PlayerSkillSystem : MonoBehaviour
     void TestFireXP()
     {
 
-        GainSkillXP("Fire Magic", 1000, TrainingType.Combat);
+        GainSkillXP(fireSkill, 100, TrainingType.Combat);
 
     }
 
