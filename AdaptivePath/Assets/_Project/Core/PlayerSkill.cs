@@ -81,7 +81,7 @@ public class PlayerSkill
         if (level == 25 && skillSystem != null)
         {
 
-            skillSystem.NotifyReathed25(this);
+            skillSystem.NotifyReached25(this);
 
         }
         

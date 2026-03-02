@@ -16,6 +16,8 @@ public class PlayerCameraController : MonoBehaviour {
         inputActions = new PlayerInputActions();
         playerBody = transform.parent;
 
+        mouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", mouseSensitivity);
+
     }
 
     void OnEnable() {
@@ -33,8 +35,8 @@ public class PlayerCameraController : MonoBehaviour {
 
         lookInput = inputActions.Player.Look.ReadValue<Vector2>();
 
-        float mouseX = lookInput.x * mouseSensitivity * Time.deltaTime;
-        float mouseY = lookInput.y * mouseSensitivity * Time.deltaTime;
+        float mouseX = lookInput.x * mouseSensitivity;
+        float mouseY = lookInput.y * mouseSensitivity;
 
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
@@ -42,6 +44,14 @@ public class PlayerCameraController : MonoBehaviour {
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
         playerBody.Rotate(Vector3.up * mouseX);
+    }
+
+    public void SetMouseSensitivity(float value)
+    {
+
+        mouseSensitivity = value;
+        PlayerPrefs.SetFloat("MouseSensitivity", value);
+
     }
 }
 
